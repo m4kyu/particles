@@ -1,8 +1,14 @@
 #include <raylib.h>
+#include <stdlib.h>
 
 
 #define WIDTH 600
 #define HEIGHT 400
+
+#define SPEED 5
+
+#define PARTICLES 50
+#define COLORS 5
 
 
 struct Particle {
@@ -15,29 +21,38 @@ struct Particle {
   Color color;
 };
 
-void updateParticle(struct Particle *part); 
 
+
+const Color colors[COLORS] = {RED, GREEN, BLUE, YELLOW, ORANGE};
+static struct Particle particles[PARTICLES];
+
+void updateParticles(); 
 
 int main() {
   InitWindow(WIDTH, HEIGHT, "Particles");
   SetTargetFPS(60);
 
-
-  struct Particle particle = {
-    (Vector2){100, 100},
-    (Vector2){5, 5},
-    5,
-    10,
-    RED
-  };
+  for (int i = 0; i < PARTICLES; i++) {
+      particles[i] = (struct Particle){
+        (Vector2){(rand() % WIDTH) + 10, (rand() % HEIGHT) + 10},
+        (Vector2){(rand() % 2) == 1 ? -SPEED : SPEED, (rand() % 2) == 1 ? -SPEED : SPEED},
+        5,
+        10,
+        colors[rand() % COLORS]
+    };
+  }
 
   while (!WindowShouldClose()) {
-    updateParticle(&particle);
+    updateParticles();
 
 
     BeginDrawing();
     ClearBackground(BLACK);
-    DrawCircleV(particle.pos, particle.radius, particle.color);
+
+    for (int i = 0; i < PARTICLES; i++) {
+      DrawCircleV(particles[i].pos, particles[i].radius, particles[i].color);
+    }
+
     DrawFPS(0, 0);
     EndDrawing();
   } 
@@ -49,27 +64,30 @@ int main() {
 }
 
 
-void updateParticle(struct Particle *part) {
-  part->pos.x += part->vel.x;
-  part->pos.y += part->vel.y;
+void updateParticles() {
+  for (int i = 0; i < PARTICLES; i++) {
+    particles[i].pos.x += particles[i].vel.x;
+    particles[i].pos.y += particles[i].vel.y;
 
 
-  if (part->pos.x + part->radius >= WIDTH) {
-    part->pos.x = WIDTH - part->radius;
-    part->vel.x *= -1;
-  } else if (part->pos.x - part->radius <= 0) {
-    part->pos.x = 0 + part->radius;
-    part->vel.x *= -1;
+    if (particles[i].pos.x + particles[i].radius >= WIDTH) {
+      particles[i].pos.x = WIDTH - particles[i].radius;
+      particles[i].vel.x *= -1;
+    } else if (particles[i].pos.x - particles[i].radius <= 0) {
+      particles[i].pos.x = 0 + particles[i].radius;
+      particles[i].vel.x *= -1;
+    }
+
+    if (particles[i].pos.y + particles[i].radius >= HEIGHT) {
+      particles[i].pos.y = HEIGHT - particles[i].radius;
+      particles[i].vel.y *= -1;
+    } else if (particles[i].pos.y - particles[i].radius <= 0) {
+      particles[i].pos.y = 0 + particles[i].radius;
+      particles[i].vel.y *= -1;
+    }
+
   }
-
-  if (part->pos.y + part->radius >= HEIGHT) {
-    part->pos.y = HEIGHT - part->radius;
-    part->vel.y *= -1;
-  } else if (part->pos.y - part->radius <= 0) {
-    part->pos.y = 0 + part->radius;
-    part->vel.y *= -1;
-  }
-
+  
 }
 
 
